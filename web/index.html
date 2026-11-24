@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MRP → 구매계획_통합</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo">📦</span>
+    <div>
+      <h1>MRP → 구매계획_통합</h1>
+      <p class="sub">파일은 이 브라우저 안에서만 처리됩니다 · 서버 전송 없음</p>
+    </div>
+  </div>
+  <div class="engine" id="engine"><span class="dot busy"></span><span id="engineText">엔진 준비 중…</span></div>
+</header>
+
+<main>
+  <!-- 0. 마스터 -->
+  <section class="card" id="sec-master">
+    <div class="card-head">
+      <span class="num">0</span>
+      <div><h2>품목 마스터</h2><p>출처·BPA·공급자·규격·구분·비고·MOQ (수기 관리 정보)</p></div>
+      <div class="head-right" id="masterBadge"></div>
+    </div>
+    <div class="card-body">
+      <div id="masterEmpty" class="notice hidden">
+        <b>처음 사용하시나요?</b> 기존 <code>MRP_구매계획_통합_…xlsx</code> 를 올리면 마스터를 자동으로 만듭니다 (1회).
+        이미 내보낸 <code>item_master.csv</code> 가 있으면 그걸 올려도 됩니다.
+      </div>
+      <div class="row gap">
+        <label class="btn"><input type="file" id="masterFile" accept=".csv,.xlsx" hidden>마스터 불러오기 (.csv / 기존 통합 .xlsx)</label>
+        <button class="btn ghost" id="masterExport" disabled>마스터 내보내기 (CSV)</button>
+        <button class="btn ghost" id="masterUndo" disabled title="직전 승인 이전 상태로 되돌립니다">직전 상태로 되돌리기</button>
+      </div>
+      <div id="masterReport" class="small muted"></div>
+    </div>
+  </section>
+
+  <!-- 1. MRP -->
+  <section class="card locked" id="sec-mrp">
+    <div class="card-head"><span class="num">1</span><div><h2>MRP 파일 올리기</h2><p>MRP_yymmdd.xlsx · 'MRP' 시트 전체를 값으로 변환해 사용합니다</p></div></div>
+    <div class="card-body">
+      <label class="drop" id="drop"><input type="file" id="mrpFile" accept=".xlsx" hidden>
+        <span class="drop-icon">⬆</span><span id="dropText">여기로 파일을 끌어오거나 클릭하세요</span></label>
+      <ul class="checks" id="checks"></ul>
+    </div>
+  </section>
+
+  <!-- 2. 기간 -->
+  <section class="card locked" id="sec-period">
+    <div class="card-head"><span class="num">2</span><div><h2>기간 · 휴일</h2><p>최저값 기간(C3~E3) = 기간말 과부족의 소요량 기간</p></div></div>
+    <div class="card-body">
+      <div class="row gap wrap">
+        <label class="field">시작일 <input type="date" id="start"></label>
+        <label class="field">종료일 <input type="date" id="end"></label>
+        <span class="small muted" id="periodInfo"></span>
+      </div>
+      <table class="mini" id="holTable"></table>
+      <p class="small muted">생산계획(그날 전체 소요량 합계 &gt; 0)이 있는 공휴일은 근무일로 봅니다. 주말은 항상 제외.</p>
+    </div>
+  </section>
+
+  <!-- 3. 신규 품목 -->
+  <section class="card locked" id="sec-review">
+    <div class="card-head"><span class="num hitl">3</span>
+      <div><h2>신규 품목 검토 <span class="tag">사람 확인</span></h2><p>MRP에는 있는데 마스터에 없는 품목 · 제안값을 확인하고 MOQ 등을 채워주세요</p></div>
+      <div class="head-right" id="reviewBadge"></div>
+    </div>
+    <div class="card-body">
+      <div class="toolbar">
+        <input type="search" id="q" placeholder="품번·규격·공급자 검색">
+        <select id="fOwner"><option value="">담당자 전체</option></select>
+        <label class="chk"><input type="checkbox" id="fShort"> 부족 예상만</label>
+        <label class="chk"><input type="checkbox" id="fNoMoq"> MOQ 빈칸만</label>
+        <span class="spacer"></span>
+        <span class="small muted" id="selInfo"></span>
+      </div>
+      <div class="toolbar bulk">
+        <b>선택 항목 일괄 변경</b>
+        <select id="bGubun"><option value="">구분…</option></select>
+        <input id="bSource" list="sourceList" placeholder="출처…" size="9">
+        <input id="bMoq" type="number" min="0" placeholder="MOQ…" style="width:90px">
+        <button class="btn sm" id="bApply">적용</button>
+        <button class="btn sm ghost" id="bInclude">포함</button>
+        <button class="btn sm ghost" id="bExclude">제외</button>
+      </div>
+      <datalist id="sourceList"></datalist>
+      <div class="table-wrap"><table class="grid" id="newTable"></table></div>
+      <div class="pager" id="pager"></div>
+      <details class="exc" id="excBox"><summary>예외 확인</summary><div id="excBody"></div></details>
+    </div>
+  </section>
+
+  <!-- 4. 결과 -->
+  <section class="card locked" id="sec-result">
+    <div class="card-head"><span class="num">4</span><div><h2>결과 미리보기</h2><p>엑셀 수식과 같은 로직으로 계산한 결과입니다</p></div>
+      <div class="head-right"><button class="btn" id="computeBtn">계산하기</button></div></div>
+    <div class="card-body">
+      <div class="kpis" id="kpis"></div>
+      <div class="table-wrap short"><table class="grid" id="orderTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 5. 다운로드 -->
+  <section class="card locked" id="sec-download">
+    <div class="card-head"><span class="num">5</span><div><h2>승인 · 다운로드</h2><p>신규 품목을 마스터에 저장하고 구매계획_통합 엑셀을 만듭니다</p></div></div>
+    <div class="card-body">
+      <div class="row gap wrap">
+        <button class="btn primary" id="buildBtn">승인하고 엑셀 만들기</button>
+        <label class="chk"><input type="checkbox" id="alsoCsv" checked> 마스터 CSV 백업도 함께 받기</label>
+      </div>
+      <p class="small muted" id="buildInfo">엑셀의 '구매계획_통합' 시트에는 기존과 같은 수식이 들어가므로, 엑셀에서 C3/E3 을 바꾸면 다시 계산됩니다.</p>
+    </div>
+  </section>
+</main>
+
+<div class="overlay hidden" id="overlay"><div class="spinner"></div><div id="overlayText">처리 중…</div></div>
+<div class="toast hidden" id="toast"></div>
+<script src="./app.js"></script>
+</body>
+</html>
