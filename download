@@ -1,0 +1,12 @@
+# ── 업무 데이터는 절대 커밋하지 않음 (ERP 재고·단가·공급사 정보) ──
+work/
+*.xlsx
+*.xlsm
+*.csv
+!web/assets/template.xlsx
+!web/assets/holidays.csv
+# 빌드 산출물
+_site/
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
