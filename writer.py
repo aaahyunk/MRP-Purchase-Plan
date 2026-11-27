@@ -142,7 +142,7 @@ def write_log_sheet(wb, checks, params, summary_, exc):
             ["설정", "최저값 기간", f"{params['start']} ~ {params['end']} (C3~E3, 엑셀에서 변경 가능)"],
             ["설정", "기간말 과부족 정의", "210 + 미출 + 대여 + 발주잔량 + 재고 − Σ소요량(C3~E3)"],
             ["설정", "대체품목", "규격에 'N/A' 포함 → 품목 두 행 전체 빨간 배경 (조건부서식, 규격 수정 시 자동 반영)"],
-            ["설정", "양산품목X", f"일별 소요량(X~AZ) 0이 {NON_MASS_ZERO_RUN}번 이상 연속 → 비고에 '양산품목X'(빨간 글자) 추가"
+            ["설정", "양산계획X", f"일별 소요량(X~AZ) 0이 {NON_MASS_ZERO_RUN}번 이상 연속 → 비고에 '{CU.MASS_TAG}'(빨간 글자) 추가"
              + (" · MRP 기간 끝의 연속 0은 제외" if params.get("ignore_tail", NON_MASS_IGNORE_TAIL) else "")]]
     rows += [[mark.get(c.level, c.level), c.title, c.detail] for c in checks]
     rows += [["결과", k, f"{v:,}"] for k, v in summary_.items()]

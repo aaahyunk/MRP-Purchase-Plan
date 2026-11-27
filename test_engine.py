@@ -82,7 +82,8 @@ def test_replaced_and_non_mass():
     tail = [5, 0, 5] + [0] * 10
     assert not E.is_non_mass(tail) and E.is_non_mass(tail, ignore_tail=False)   # 기본: 끝부분 0 제외
     assert E.is_non_mass([0] * 29, ignore_tail=True)           # 전체 0 은 항상 양산품목X
-    assert CU.strip_mass_tag("로봇 / 양산품목X") == "로봇" and CU.strip_mass_tag("양산품목X") == ""
+    assert CU.strip_mass_tag("로봇 / 양산품목X") == "로봇" and CU.strip_mass_tag("양산계획X") == ""
+    assert CU.strip_mass_tag("로봇 / 양산계획X") == "로봇" and CU.MASS_TAG == "양산계획X"
 
 
 def test_custom_apply_translates_formula_and_comment():

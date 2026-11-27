@@ -25,7 +25,7 @@ from openpyxl.utils import get_column_letter as CL
 from . import config as C
 
 LAYOUT_KEY = "#LAYOUT"
-MASS_TAG = "양산품목X"
+MASS_TAG = "양산계획X"
 MASS_SEP = " / "
 
 # 도구가 값을 쓰지 않는 칸 (사람이 채우면 '추가입력'으로 보존)
@@ -129,7 +129,7 @@ def strip_mass_tag(text):
     """비고에서 도구가 붙인 '양산품목X'를 떼어 사람이 쓴 내용만 남긴다."""
     if not isinstance(text, str):
         return text
-    s = re.sub(r"\s*/?\s*" + MASS_TAG + r"\s*$", "", text)
+    s = re.sub(r"\s*/?\s*(?:양산계획X|양산품목X)\s*$", "", text)   # 예전 표시(양산품목X)도 함께 제거
     return s.strip()
 
 

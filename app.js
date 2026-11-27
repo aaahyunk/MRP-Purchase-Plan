@@ -219,11 +219,11 @@ $("#computeBtn").onclick = async () => {
     const s = result.summary;
     $("#kpis").innerHTML = [["총 품목", s.총품목, ""], ["🔴 기간 중 부족 예상", s.부족예상, "warn"], ["🟡 발주 필요", s.발주필요, "accent"],
       ["잔량·210으로 커버", s.잔량커버, ""], ["MRP 미존재(0 표시)", s.MRP미존재, "muted"],
-      ["🟥 대체품목 (규격 N/A)", s["대체품목(N/A)"], "red"], ["양산품목X 표시", s.양산품목X, "muted"]]
+      ["🟥 대체품목 (규격 N/A)", s["대체품목(N/A)"], "red"], ["양산계획X 표시", s.양산품목X, "muted"]]
       .map(([t, v, c]) => `<div class="kpi ${c}"><div class="kv">${v.toLocaleString()}</div><div class="kt">${t}</div></div>`).join("");
     const o = result.orders.sort((a, b) => String(a.발주일).localeCompare(String(b.발주일)) || String(a.담당자).localeCompare(String(b.담당자)));
     $("#orderTable").innerHTML = `<thead><tr><th>발주일</th><th>품번</th><th>규격</th><th>공급자</th><th>담당자</th><th class="r">MOQ</th><th class="r">발주수량</th><th class="r">기간중최저</th><th class="r">발주잔량</th><th class="r">210</th><th class="r">기간말과부족</th><th>표시</th></tr></thead><tbody>` +
-      o.map((r) => `<tr class="${r.대체품목 ? "na" : ""}"><td>${esc(r.발주일)}</td><td class="mono">${esc(r.품번)}</td><td class="ell">${esc(r.규격)}</td><td>${esc(r.공급자)}</td><td>${esc(r.담당자)}</td><td class="r">${fmt(r.MOQ)}</td><td class="r b">${fmt(r.발주수량)}</td><td class="r bad">${fmt(r.기간중최저값)}</td><td class="r">${fmt(r.발주잔량)}</td><td class="r">${fmt(r["210"])}</td><td class="r">${fmt(r.기간말과부족)}</td><td>${r.대체품목 ? '<span class="badge red">대체 N/A</span>' : ""}${r.양산품목X ? '<span class="badge">양산X</span>' : ""}</td></tr>`).join("") + "</tbody>";
+      o.map((r) => `<tr class="${r.대체품목 ? "na" : ""}"><td>${esc(r.발주일)}</td><td class="mono">${esc(r.품번)}</td><td class="ell">${esc(r.규격)}</td><td>${esc(r.공급자)}</td><td>${esc(r.담당자)}</td><td class="r">${fmt(r.MOQ)}</td><td class="r b">${fmt(r.발주수량)}</td><td class="r bad">${fmt(r.기간중최저값)}</td><td class="r">${fmt(r.발주잔량)}</td><td class="r">${fmt(r["210"])}</td><td class="r">${fmt(r.기간말과부족)}</td><td>${r.대체품목 ? '<span class="badge red">대체 N/A</span>' : ""}${r.양산품목X ? '<span class="badge">양산계획X</span>' : ""}</td></tr>`).join("") + "</tbody>";
     S.computed = true; unlock("#sec-download");
     $("#sec-result").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (err) { showError(err); }
